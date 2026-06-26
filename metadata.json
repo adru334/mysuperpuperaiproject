@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Crypto Broker Simulator",
+  "description": "Симулятор крипто-брокера с интерактивными звонками продавцов в стиле Undertale и мини-игрой защиты от хакеров.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
