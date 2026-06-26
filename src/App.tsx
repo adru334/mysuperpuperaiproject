@@ -138,7 +138,7 @@ export default function App() {
       setMarketRefreshTimeLeft((prev) => {
         if (prev <= 1) {
           setMarketItems(generateMarketItems());
-          showToast('🛒 Ассортимент теневого рынка «BrokerOS» обновился! Загляните во вкладку «Рынок».');
+          showToast('🛒 Ассортимент теневого рынка «RocketOS» обновился! Загляните во вкладку «Рынок».');
           return 120;
         }
         return prev - 1;
@@ -324,59 +324,82 @@ export default function App() {
   // 3. Scheduler for Seller Phone calls
   useEffect(() => {
     if (showMainMenu) return;
-    const scheduleNextCall = () => {
-      const waitTime = 30000 + Math.random() * 25000; // 30-55 seconds wait
-      callTimerRef.current = setTimeout(() => {
-        // Find available character different from the previous one
-        const callers = CHARACTERS.filter((c) => c.id !== lastPickedCharRef.current);
-        const nextChar = callers[Math.floor(Math.random() * callers.length)];
+    if (hackerAttack.isActive || activeDialogueCharacter || incomingCallCharacter) return;
 
-        if (nextChar && !hackerAttack.isActive && !activeDialogueCharacter) {
-          lastPickedCharRef.current = nextChar.id;
-          setIncomingCallCharacter(nextChar);
-          SoundManager.playRing();
+    const waitTime = 30000 + Math.random() * 25000; // 30-55 seconds wait
+    const timer = setTimeout(() => {
+      // Find available character different from the previous one
+      const callers = CHARACTERS.filter((c) => c.id !== lastPickedCharRef.current);
+      const nextChar = callers[Math.floor(Math.random() * callers.length)];
 
-          // Auto disconnect if not answered in 14 seconds
-          setTimeout(() => {
-            setIncomingCallCharacter((prev) => {
-              if (prev && prev.id === nextChar.id) {
-                showToast(`Пропущенный звонок от: ${nextChar.name}`);
-                return null;
-              }
-              return prev;
-            });
-          }, 14000);
-        }
-        scheduleNextCall();
-      }, waitTime);
-    };
+      if (nextChar) {
+        lastPickedCharRef.current = nextChar.id;
+        setIncomingCallCharacter(nextChar);
+        SoundManager.playRing();
 
-    scheduleNextCall();
-    return () => {
-      if (callTimerRef.current) clearTimeout(callTimerRef.current);
-    };
-  }, [hackerAttack.isActive, activeDialogueCharacter, showMainMenu]);
+        // Auto disconnect if not answered in 14 seconds
+        setTimeout(() => {
+          setIncomingCallCharacter((prev) => {
+            if (prev && prev.id === nextChar.id) {
+              showToast(`Пропущенный звонок от: ${nextChar.name}`);
+              return null;
+            }
+            return prev;
+          });
+        }, 14000);
+      }
+    }, waitTime);
+
+    return () => clearTimeout(timer);
+  }, [hackerAttack.isActive, activeDialogueCharacter, incomingCallCharacter, showMainMenu]);
 
   // 4. Hacker Attacks schedules
   useEffect(() => {
     if (showMainMenu) return;
-    const launchHackerScheduler = () => {
-      // 50-80 seconds interval between cyber incidents
-      const waitTime = 45000 + Math.random() * 35000;
-      const timer = setTimeout(() => {
-        // Trigger cyber hacker attack if no dialogue is active
-        if (!hackerAttack.isActive && !activeDialogueCharacter) {
-          triggerHackerBreach();
-        }
-        launchHackerScheduler();
-      }, waitTime);
+    if (hackerAttack.isActive || activeDialogueCharacter) return;
 
-      return timer;
-    };
+    // 55-90 seconds interval between cyber incidents
+    const waitTime = 55000 + Math.random() * 35000;
+    const timer = setTimeout(() => {
+      triggerHackerBreach();
+    }, waitTime);
 
-    const intervalTimer = launchHackerScheduler();
-    return () => clearTimeout(intervalTimer);
+    return () => clearTimeout(timer);
   }, [hackerAttack.isActive, activeDialogueCharacter, firewallLevel, showMainMenu]);
+
+  // 4.5 Active Hacker Attack Countdown
+  useEffect(() => {
+    if (showMainMenu) return;
+    if (!hackerAttack.isActive) return;
+
+    // Ring alarm alarm sound loop
+    const alarmInterval = setInterval(() => {
+      SoundManager.playAlarm();
+    }, 1200);
+
+    // Countdown interval
+    const countdownInterval = setInterval(() => {
+      setHackerAttack((prev) => {
+        if (prev.timeLeft <= 1) {
+          return { ...prev, timeLeft: 0 };
+        }
+        return { ...prev, timeLeft: prev.timeLeft - 1 };
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(alarmInterval);
+      clearInterval(countdownInterval);
+    };
+  }, [hackerAttack.isActive, showMainMenu]);
+
+  // 4.6 Handle Timeout Expiration for Hacker Penalty
+  useEffect(() => {
+    if (hackerAttack.isActive && hackerAttack.timeLeft === 0) {
+      setHackerAttack((prev) => ({ ...prev, isActive: false }));
+      executeHackerPenalty();
+    }
+  }, [hackerAttack.isActive, hackerAttack.timeLeft]);
 
   const triggerHackerBreach = () => {
     // Check firewall auto defend block roll: 
@@ -401,34 +424,6 @@ export default function App() {
       correctSequence: [],
       threatLevel: firewallLevel >= 3 ? 'low' : 'medium',
     });
-
-    // Clear any dangling alarms first
-    if (alarmTimerRef.current) {
-      clearInterval(alarmTimerRef.current);
-    }
-
-    // Ring alarm alarm sound loop
-    const alarmInterval = setInterval(() => {
-      if (showMainMenuRef.current) return; // PAUSED IN MENU
-      SoundManager.playAlarm();
-    }, 1200);
-    alarmTimerRef.current = alarmInterval;
-
-    hackerTimerRef.current = setInterval(() => {
-      if (showMainMenuRef.current) return; // PAUSED IN MENU
-      setHackerAttack((prev) => {
-        if (prev.timeLeft <= 1) {
-          if (hackerTimerRef.current) clearInterval(hackerTimerRef.current);
-          if (alarmTimerRef.current) {
-            clearInterval(alarmTimerRef.current);
-            alarmTimerRef.current = null;
-          }
-          executeHackerPenalty(); // Penalty happens if timer clocks down to zero
-          return { ...prev, isActive: false };
-        }
-        return { ...prev, timeLeft: prev.timeLeft - 1 };
-      });
-    }, 1000);
   };
 
   const executeHackerPenalty = () => {
@@ -451,13 +446,6 @@ export default function App() {
   };
 
   const handleResolveHack = (success: boolean) => {
-    if (hackerTimerRef.current) {
-      clearInterval(hackerTimerRef.current);
-    }
-    if (alarmTimerRef.current) {
-      clearInterval(alarmTimerRef.current);
-      alarmTimerRef.current = null;
-    }
     // Clean states
     setHackerAttack((prev) => ({ ...prev, isActive: false }));
 
@@ -713,7 +701,7 @@ export default function App() {
                 </div>
                 
                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-indigo-400 drop-shadow-[0_4px_12px_rgba(251,146,60,0.15)] select-none">
-                  BROKER.OS
+                  ROCKET.OS
                 </h1>
                 
                 <p className="text-xs md:text-sm text-zinc-400 font-sans tracking-wide mt-2 font-medium uppercase">
@@ -738,7 +726,7 @@ export default function App() {
                       ⚠️ ВНИМАНИЕ! КРИТИЧЕСКАЯ ОПЕРАЦИЯ ⚠️
                     </p>
                     <p className="text-stone-300 font-medium">
-                      Вы собираетесь уничтожить текущую теневую сессию и стереть все данные из памяти BROKER.OS.
+                      Вы собираетесь уничтожить текущую теневую сессию и стереть все данные из памяти ROCKET.OS.
                     </p>
                     <div className="pl-4 border-l-2 border-rose-700/60 space-y-1.5 text-zinc-400 font-mono">
                       <div>• Накопленный баланс: <strong className="text-white">{Math.round(walletBalance)}₽</strong></div>

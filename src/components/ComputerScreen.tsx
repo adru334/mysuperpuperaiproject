@@ -52,8 +52,123 @@ interface ComputerScreenProps {
   reputation: number;
 }
 
+const RocketBossHead = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg
+    viewBox="0 0 64 64"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    {/* Purple Hoodie Base / Shoulders */}
+    <path
+      d="M 6 56 C 6 46, 18 42, 32 42 C 46 42, 58 46, 58 56 L 58 64 L 6 64 Z"
+      fill="#6b21a8"
+      stroke="#020617"
+      strokeWidth="2.5"
+      strokeLinejoin="round"
+    />
+    
+    {/* Hoodie Collar Fold */}
+    <path
+      d="M 16 43 C 24 50, 40 50, 48 43 C 49 46, 46 52, 40 54 C 32 56, 24 54, 16 43 Z"
+      fill="#581c87"
+      stroke="#020617"
+      strokeWidth="2.5"
+      strokeLinejoin="round"
+    />
+    
+    {/* White Drawstrings */}
+    <rect x="27" y="49" width="1.5" height="11" rx="0.75" fill="#ffffff" stroke="#020617" strokeWidth="1" />
+    <rect x="34" y="50" width="1.5" height="9" rx="0.75" fill="#ffffff" stroke="#020617" strokeWidth="1" />
+
+    {/* Alien Head */}
+    <path
+      d="M 32 5 C 19 5, 11 13, 11 26 C 11 37, 20 44, 32 44 C 44 44, 53 37, 53 26 C 53 13, 45 5, 32 5 Z"
+      fill="url(#alienSkin)"
+      stroke="#020617"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    {/* Cheeky lopsided ear/head folds shadows in black */}
+    <path
+      d="M 12 28 C 11.5 31, 13 34, 14 35"
+      stroke="#020617"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M 52 28 C 52.5 31, 51 34, 50 35"
+      stroke="#020617"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+
+    {/* Big glossy black alien eyes */}
+    {/* Left Eye */}
+    <path
+      d="M 16 26 C 16.5 19, 23.5 15, 29.5 24 C 31.5 29, 28.5 37, 23.5 37 C 18.5 37, 15.5 32, 16 26 Z"
+      fill="#020617"
+      stroke="#020617"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    {/* Right Eye */}
+    <path
+      d="M 48 26 C 47.5 19, 40.5 15, 34.5 24 C 32.5 29, 35.5 37, 40.5 37 C 45.5 37, 48.5 32, 48 26 Z"
+      fill="#020617"
+      stroke="#020617"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+
+    {/* Glossy glints on eyes */}
+    {/* Left Eye Glint */}
+    <ellipse cx="20" cy="24" rx="2" ry="4.5" transform="rotate(-25 20 24)" fill="#ffffff" />
+    <circle cx="25" cy="31" r="1.2" fill="#ffffff" opacity="0.8" />
+    <circle cx="21" cy="33" r="0.7" fill="#ffffff" opacity="0.6" />
+
+    {/* Right Eye Glint */}
+    <ellipse cx="44" cy="24" rx="2" ry="4.5" transform="rotate(25 44 24)" fill="#ffffff" />
+    <circle cx="39" cy="31" r="1.2" fill="#ffffff" opacity="0.8" />
+    <circle cx="43" cy="33" r="0.7" fill="#ffffff" opacity="0.6" />
+
+    {/* Cheeky Smile showing teeth */}
+    <g>
+      {/* Mouth outline/background */}
+      <path
+        d="M 23 35 C 24 41, 38 41, 39 35 C 39 35, 31 43, 23 35 Z"
+        fill="#1e1b4b"
+        stroke="#020617"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {/* Tooth curve */}
+      <path
+        d="M 24 35.2 C 26 38.2, 36 38.2, 38 35.2 C 34 36.5, 28 36.5, 24 35.2 Z"
+        fill="#ffffff"
+      />
+      {/* Underlip line shadow */}
+      <path
+        d="M 28 42.5 C 30 43.5, 32 43.5, 34 42.5"
+        stroke="#020617"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </g>
+
+    <defs>
+      <linearGradient id="alienSkin" x1="32" y1="5" x2="32" y2="44" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#eefb57" />
+        <stop offset="100%" stopColor="#a3e635" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 export function getReputationTier(reputation: number) {
-  if (reputation >= 85) return { label: 'Уважаемый Брокер 🌟', color: 'text-emerald-400 border-emerald-500/30 bg-emerald-950/30' };
+  if (reputation >= 85) return { label: 'Рокет-Босс 🌟', color: 'text-emerald-400 border-emerald-500/30 bg-emerald-950/30' };
   if (reputation >= 65) return { label: 'Надежный Партнер 👍', color: 'text-cyan-400 border-cyan-500/20 bg-cyan-950/20' };
   if (reputation >= 45) return { label: 'Обычный Трейдер 🤝', color: 'text-amber-400 border-amber-500/20 bg-amber-950/20' };
   if (reputation >= 25) return { label: 'Подозрительный Тип 🤨', color: 'text-orange-400 border-orange-500/25 bg-orange-950/30' };
@@ -261,8 +376,8 @@ export default function ComputerScreen({
       {/* OS Header */}
       <div className="bg-slate-905 bg-slate-900 border-b-4 border-slate-800 px-4 py-2.5 flex justify-between items-center select-none shrink-0 font-mono text-xs">
         <div className="flex items-center gap-2 text-cyan-400">
-          <Cpu className="w-4 h-4 animate-spin-slow" />
-          <span className="font-bold text-slate-200">БрокерОС v2.4</span>
+          <RocketBossHead className="w-5.5 h-5.5 animate-spin-slow" />
+          <span className="font-bold text-slate-200">RocketOS v2.4</span>
           <span className="bg-slate-850 bg-[#1e293b] text-cyan-400 px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold">Активен</span>
         </div>
 
@@ -787,7 +902,7 @@ export default function ComputerScreen({
 
                 {/* Subtitle / Ambient flavor */}
                 <p className="text-[10px] sm:text-[11px] text-zinc-400 mb-3 leading-relaxed max-w-2xl shrink-0">
-                  Добро пожаловать в лавку «BrokerOS». Здесь торговцы продают физические диски и накопители с коинами в обход биржи. <span className="text-cyan-400 font-bold">Один клик — и монеты на счету!</span>
+                  Добро пожаловать в лавку «RocketOS». Здесь торговцы продают физические диски и накопители с коинами в обход биржи. <span className="text-cyan-400 font-bold">Один клик — и монеты на счету!</span>
                 </p>
 
                 {/* Grid of items (Changed from 3 cols to 2 cols to make windows larger, and reduced font sizes inside) */}
